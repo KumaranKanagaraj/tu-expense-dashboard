@@ -40,6 +40,31 @@ function reportYears() {
   $('report-year').value = state.reportStart === `${selectedYear}-01-01` && state.reportEnd === `${selectedYear}-12-31` && years.includes(Number(selectedYear)) ? selectedYear : 'custom';
 }
 
+function setReportRangePreset(preset) {
+  const today = new Date();
+  let start;
+  let end = today;
+  if (preset === 'last-month') {
+    start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    end = new Date(today.getFullYear(), today.getMonth(), 0);
+  } else {
+    const months = preset === 'this-month' ? 1 : Number(preset.split('-')[0]);
+    start = new Date(today.getFullYear(), today.getMonth() - months + 1, 1);
+  }
+  state.reportStart = dateKey(start);
+  state.reportEnd = dateKey(end);
+  state.page = 0;
+  $('report-start').value = state.reportStart;
+  $('report-end').value = state.reportEnd;
+  $('report-year').value = 'custom';
+  document.querySelectorAll('[data-range-preset]').forEach(button => {
+    const selected = button.dataset.rangePreset === preset;
+    button.classList.toggle('selected', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
+  render();
+}
+
 function persist() {
   try { localStorage.setItem('kinfolk-preferences', JSON.stringify({ budget: state.budget, currency: state.currency })); } catch { }
 }
@@ -405,6 +430,7 @@ $('report-year').addEventListener('change', event => {
   state.reportEnd = `${event.target.value}-12-31`;
   $('report-start').value = state.reportStart;
   $('report-end').value = state.reportEnd;
+  document.querySelectorAll('[data-range-preset]').forEach(button => { button.classList.remove('selected'); button.setAttribute('aria-pressed', 'false'); });
   state.page = 0;
   render();
 });
@@ -412,10 +438,12 @@ for (const [id, key] of [['report-start', 'reportStart'], ['report-end', 'report
   $(id).addEventListener('change', event => {
     state[key] = event.target.value;
     state.page = 0;
+    document.querySelectorAll('[data-range-preset]').forEach(button => { button.classList.remove('selected'); button.setAttribute('aria-pressed', 'false'); });
     $('report-year').value = state.reportStart.slice(0, 4) === state.reportEnd.slice(0, 4) && state.reportStart.endsWith('-01-01') && state.reportEnd.endsWith('-12-31') && [...$('report-year').options].some(option => option.value === state.reportStart.slice(0, 4)) ? state.reportStart.slice(0, 4) : 'custom';
     render();
   });
 }
+document.querySelectorAll('[data-range-preset]').forEach(button => button.addEventListener('click', () => setReportRangePreset(button.dataset.rangePreset)));
 $('view-all').addEventListener('click', () => { location.hash = 'transactions'; setView('transactions'); });
 $('plan-button').addEventListener('click', () => { location.hash = 'plan'; setView('plan'); });
 for (const [id, key] of [['account-filter', 'account'], ['category-filter', 'category'], ['direction-filter', 'direction']]) {

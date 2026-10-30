@@ -38,6 +38,12 @@
           <label>Year<select id="report-year" aria-label="Period year"><option value="custom">Custom range</option></select></label>
           <label>From<input type="date" id="report-start" min="1900-01-01" max="9999-12-31" aria-describedby="report-error" /></label>
           <label>To<input type="date" id="report-end" min="1900-01-01" max="9999-12-31" aria-describedby="report-error" /></label>
+          <div class="report-presets" role="group" aria-label="Quick date ranges">
+            <button type="button" data-range-preset="this-month" aria-pressed="false">This month</button>
+            <button type="button" data-range-preset="last-month" aria-pressed="false">Last month</button>
+            <button type="button" data-range-preset="3-months" aria-pressed="false">Last 3 months</button>
+            <button type="button" data-range-preset="6-months" aria-pressed="false">Last 6 months</button>
+          </div>
           <span class="report-range-note" id="report-range-note"></span>
         </div>
         <p class="notice error" id="report-error" role="alert" hidden></p>
